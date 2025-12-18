@@ -54,7 +54,7 @@
 └───────┬───────┴───────┬───────┴───────┬───────┴───────┬───────┘
         │               │               │               │
         │ Fivetran      │ Fivetran      │ Fivetran      │ Fivetran
-        │ (Every 6hrs)  │               │               │
+        │ (Daily 21:49) │               │               │
         ↓               ↓               ↓               ↓
 ┌──────────────────────────────────────────────────────────────────┐
 │                    LAYER 1: gtm_raw                               │
@@ -618,38 +618,37 @@ rev_ops_prod (catalog)
 
 ## Data Refresh & Scheduling
 
-### Current State (Manual)
+### Automated Daily Sync
 
 **Fivetran Sync:**
-- Frequency: Every 6 hours (automated)
+- Frequency: Daily at 21:49 PST
 - Method: Incremental sync with Change Data Capture
 - Destination: `gtm_raw` schema
 - Management: External Fivetran service
 
-**dbt Runs:**
-- Frequency: On-demand (manual)
+**dbt Transformations:**
+- Frequency: Daily at 21:59 PST (10 minutes after Fivetran sync)
 - Command: `dbt run`
-- Duration: ~2-3 minutes for full refresh
-- Trigger: Analyst runs manually when fresh data needed
+- Duration: ~4-5 minutes for full refresh
+- Trigger: Automated schedule
 
 ### Data Freshness
 
-- **gtm_raw**: Always fresh (Fivetran manages)
-- **gtm_staging**: As fresh as last `dbt run`
-- **gtm_core**: As fresh as last `dbt run`
+- **gtm_raw**: Updated daily at 21:49 PST (Fivetran)
+- **gtm_staging**: Updated daily at 21:59 PST (dbt)
+- **gtm_core**: Updated daily at 21:59 PST (dbt)
 
-**To get latest data:**
+**To manually refresh data (if needed):**
 ```bash
 dbt run
 ```
 
-### Future State (Automated)
+### Schedule Summary
 
-Potential scheduling options:
-- **Databricks Jobs**: Schedule `dbt run` via Databricks workflow
-- **Airflow**: Orchestrate dbt via Airflow DAG
-- **dbt Cloud**: Managed scheduling (requires dbt Cloud account)
-- **Cron**: Simple cron job on server
+| Process | Time (PST) | Frequency |
+|---------|------------|-----------|
+| Fivetran sync | 21:49 | Daily |
+| dbt transformations | 21:59 | Daily |
 
 ---
 

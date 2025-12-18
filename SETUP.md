@@ -336,10 +336,14 @@ rev_ops_prod (catalog)
 
 ## Data Refresh Schedule
 
-- **Fivetran sync:** Every 6 hours (managed externally)
-- **dbt runs:** On-demand (you control when to run)
-- **Raw data:** Always fresh from Fivetran
-- **Staging/Core:** Updated when you run `dbt run`
+| Process | Time (PST) | Frequency |
+|---------|------------|-----------|
+| Fivetran sync | 21:49 | Daily |
+| dbt transformations | 21:59 | Daily |
+
+- **gtm_raw:** Updated daily at 21:49 PST (Fivetran)
+- **gtm_staging/gtm_core:** Updated daily at 21:59 PST (dbt)
+- **Manual runs:** You can run `dbt run` anytime for immediate refresh
 
 ## Troubleshooting
 
