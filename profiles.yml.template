@@ -1,0 +1,64 @@
+# dbt Profile Configuration for opsDB
+#
+# INSTRUCTIONS:
+# 1. Copy this file to ~/.dbt/profiles.yml
+#    cp profiles.yml.template ~/.dbt/profiles.yml
+#
+# 2. Authenticate with Databricks:
+#    databricks auth login --host https://hginsights-rev-ops-prod.cloud.databricks.com
+#
+# 3. Test connection:
+#    dbt debug
+#
+# See SETUP.md for detailed configuration instructions
+
+opsdb:
+  target: gtm_dev
+  outputs:
+
+    # Development target - uses gtm_staging schema
+    gtm_dev:
+      type: databricks
+      catalog: rev_ops_prod
+      schema: gtm_staging
+      host: hginsights-rev-ops-prod.cloud.databricks.com
+      http_path: /sql/1.0/warehouses/04baa17dc9cb9ee6
+      auth_type: oauth
+      threads: 4
+
+    # Production target - uses gtm_core schema
+    gtm_prod:
+      type: databricks
+      catalog: rev_ops_prod
+      schema: gtm_core
+      host: hginsights-rev-ops-prod.cloud.databricks.com
+      http_path: /sql/1.0/warehouses/04baa17dc9cb9ee6
+      auth_type: oauth
+      threads: 4
+
+# ALTERNATIVE: Personal Access Token Authentication
+# If OAuth doesn't work, uncomment and use PAT instead:
+#
+# opsdb:
+#   target: gtm_dev
+#   outputs:
+#     gtm_dev:
+#       type: databricks
+#       catalog: rev_ops_prod
+#       schema: gtm_staging
+#       host: hginsights-rev-ops-prod.cloud.databricks.com
+#       http_path: /sql/1.0/warehouses/04baa17dc9cb9ee6
+#       token: <YOUR_PERSONAL_ACCESS_TOKEN>
+#       threads: 4
+#
+# WARNING: Never commit profiles.yml with tokens to git!
+
+# CONFIGURATION REFERENCE:
+#
+# type: databricks - Use Databricks adapter
+# catalog: Unity Catalog name (rev_ops_prod)
+# schema: Target schema (gtm_staging for dev, gtm_core for prod)
+# host: Databricks workspace hostname
+# http_path: SQL Warehouse endpoint path
+# auth_type: oauth or token
+# threads: Number of concurrent connections (1-8 recommended)

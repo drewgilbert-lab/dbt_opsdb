@@ -1,0 +1,657 @@
+version: 2
+
+sources:
+  - name: salesforce
+    description: |
+      Salesforce CRM data ingested via Fivetran.
+      Data lands in gtm_raw schema with no transformations.
+    database: rev_ops_prod
+    schema: gtm_raw
+    tables:
+      - name: account
+        description: Salesforce Accounts (companies and organizations)
+        identifier: account
+        columns:
+          - name: id
+            description: Salesforce Account ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: name
+            description: Account name
+          - name: _fivetran_synced
+            description: Timestamp of last Fivetran sync
+          - name: _fivetran_deleted
+            description: Fivetran soft delete flag
+          - name: is_deleted
+            description: Salesforce soft delete flag
+
+      - name: contact
+        description: Salesforce Contacts (people)
+        identifier: contact
+        columns:
+          - name: id
+            description: Salesforce Contact ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: account_id
+            description: Related Account ID
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: lead
+        description: Salesforce Leads (pre-conversion prospects)
+        identifier: lead
+        columns:
+          - name: id
+            description: Salesforce Lead ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: opportunity
+        description: Salesforce Opportunities (sales pipeline and deals)
+        identifier: opportunity
+        columns:
+          - name: id
+            description: Salesforce Opportunity ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: account_id
+            description: Related Account ID
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: event
+        description: Salesforce Events (meetings, calls, demos)
+        identifier: event
+        columns:
+          - name: id
+            description: Salesforce Event ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: who_id
+            description: Contact ID
+          - name: what_id
+            description: Related Account or Opportunity ID
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: task
+        description: Salesforce Tasks (activities, to-dos)
+        identifier: task
+        columns:
+          - name: id
+            description: Salesforce Task ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: who_id
+            description: Contact ID
+          - name: what_id
+            description: Related Account or Opportunity ID
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: opportunity_contact_role
+        description: Links contacts to opportunities with roles
+        identifier: opportunity_contact_role
+        columns:
+          - name: id
+            description: OpportunityContactRole ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: opportunity_id
+            description: Opportunity ID
+            data_tests:
+              - not_null
+          - name: contact_id
+            description: Contact ID
+            data_tests:
+              - not_null
+          - name: role
+            description: Contact's role on this opportunity
+          - name: is_primary
+            description: Is this the primary contact?
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: opportunity_field_history
+        description: |
+          Salesforce OpportunityFieldHistory (Phase 3)
+          Tracks all field changes on opportunities over time.
+          Used for stage velocity analysis and temporal joins.
+        identifier: opportunity_field_history
+        columns:
+          - name: id
+            description: Unique ID for the field history record
+            data_tests:
+              - not_null
+              - unique
+          - name: opportunity_id
+            description: ID of the opportunity that changed
+            data_tests:
+              - not_null
+          - name: field
+            description: Name of the field that changed (e.g., 'StageName')
+          - name: old_value
+            description: Previous value before change
+          - name: new_value
+            description: New value after change
+          - name: created_date
+            description: When the change occurred
+            data_tests:
+              - not_null
+          - name: created_by_id
+            description: User who made the change
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: campaign
+        description: |
+          Salesforce Campaigns (marketing campaigns and programs)
+          Tracks marketing initiatives, events, webinars, and other campaigns.
+          Synced Nov 6, 2025.
+        identifier: campaign
+        columns:
+          - name: id
+            description: Salesforce Campaign ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: name
+            description: Campaign name
+          - name: type
+            description: Campaign type (e.g., Email, Webinar, Event)
+          - name: status
+            description: Campaign status (Planned, In Progress, Completed, etc.)
+          - name: is_active
+            description: Whether campaign is currently active
+          - name: parent_id
+            description: Parent campaign ID for hierarchical campaigns
+          - name: owner_id
+            description: Campaign owner (User ID)
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: campaign_member
+        description: |
+          Salesforce CampaignMembers (leads and contacts in campaigns)
+          Links leads/contacts to campaigns with status and response tracking.
+          1.6M records. Synced Nov 6, 2025.
+        identifier: campaign_member
+        columns:
+          - name: id
+            description: CampaignMember ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: campaign_id
+            description: Related Campaign ID
+            data_tests:
+              - not_null
+          - name: lead_id
+            description: Related Lead ID (mutually exclusive with contact_id)
+          - name: contact_id
+            description: Related Contact ID (mutually exclusive with lead_id)
+          - name: status
+            description: Member status (Sent, Responded, etc.)
+          - name: has_responded
+            description: Whether member has responded to campaign
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: campaign_influence
+        description: |
+          Salesforce CampaignInfluence (multi-touch attribution)
+          Links campaigns to opportunities showing influence and revenue attribution.
+          16K records. Synced Nov 6, 2025.
+        identifier: campaign_influence
+        columns:
+          - name: id
+            description: CampaignInfluence ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: campaign_id
+            description: Related Campaign ID
+            data_tests:
+              - not_null
+          - name: opportunity_id
+            description: Related Opportunity ID
+            data_tests:
+              - not_null
+          - name: contact_id
+            description: Related Contact ID
+          - name: influence
+            description: Influence percentage (0-100)
+          - name: revenue_share
+            description: Attributed revenue amount
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: period
+        description: |
+          Salesforce Period (fiscal periods for forecasting)
+          Defines fiscal periods (months, quarters, years) used in forecasting.
+          408 records. Synced Nov 6, 2025.
+        identifier: period
+        columns:
+          - name: id
+            description: Period ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: type
+            description: Period type (Month, Quarter, Year)
+          - name: start_date
+            description: Period start date
+          - name: end_date
+            description: Period end date
+          - name: quarter_label
+            description: Quarter label (e.g., Q1)
+          - name: period_label
+            description: Period label (e.g., Jan 2025)
+          - name: fully_qualified_label
+            description: Full period name (e.g., Q1 2025 - Jan)
+          - name: is_forecast_period
+            description: Whether this period is used for forecasting
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+
+      - name: forecasting_quota
+        description: |
+          Salesforce ForecastingQuota (sales quotas by period)
+          Defines sales quotas for reps by period and product family.
+          1.6K records. Synced Nov 6, 2025.
+        identifier: forecasting_quota
+        columns:
+          - name: id
+            description: ForecastingQuota ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: period_id
+            description: Related Period ID
+            data_tests:
+              - not_null
+          - name: quota_owner_id
+            description: User ID who owns this quota
+          - name: product_family
+            description: Product family this quota applies to
+          - name: quota_amount
+            description: Quota amount target
+          - name: quota_quantity
+            description: Quota quantity target
+          - name: start_date
+            description: Quota start date
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+
+      - name: forecasting_item
+        description: |
+          Salesforce ForecastingItem (forecast submissions)
+          Aggregate forecast amounts by owner, period, and category.
+          23K records. Synced Nov 6, 2025.
+          Note: This is aggregate-level, not per-opportunity.
+        identifier: forecasting_item
+        columns:
+          - name: id
+            description: ForecastingItem ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: owner_id
+            description: User ID who owns this forecast
+          - name: period_id
+            description: Related Period ID
+          - name: forecasting_item_category
+            description: Forecast category (Pipeline, BestCase, Commit, etc.)
+          - name: forecast_category_name
+            description: Human-readable category name
+          - name: forecast_amount
+            description: Forecasted amount
+          - name: forecast_quantity
+            description: Forecasted quantity
+          - name: parent_forecasting_item_id
+            description: Parent forecast item (hierarchical rollup)
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+
+      - name: email_message
+        description: |
+          Salesforce EmailMessage (email tracking)
+          Tracks emails sent/received in Salesforce with engagement metrics.
+          9.9K records. Synced Nov 6, 2025.
+        identifier: email_message
+        columns:
+          - name: id
+            description: EmailMessage ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: related_to_id
+            description: Related record ID (polymorphic - can be Opportunity, Account, etc.)
+          - name: from_address
+            description: Sender email address
+          - name: to_address
+            description: Recipient email addresses
+          - name: subject
+            description: Email subject line
+          - name: message_date
+            description: When the email was sent/received
+          - name: is_opened
+            description: Whether the email was opened
+          - name: is_bounced
+            description: Whether the email bounced
+          - name: first_opened_date
+            description: When the email was first opened
+          - name: last_opened_date
+            description: When the email was last opened
+          - name: status
+            description: Email status (Sent, Bounced, etc.)
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: user
+        description: |
+          Salesforce Users (employees, reps, managers)
+          User records for everyone in the Salesforce org.
+          432 records. Used for owner_name resolution.
+        identifier: user
+        columns:
+          - name: id
+            description: Salesforce User ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: name
+            description: Full name of user
+          - name: email
+            description: User email address
+          - name: username
+            description: Salesforce username
+          - name: is_active
+            description: Whether user is currently active
+          - name: manager_id
+            description: User's manager (User ID)
+          - name: user_role_id
+            description: User's role ID
+          - name: department
+            description: User's department
+          - name: title
+            description: User's job title
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+
+      - name: pricebook_2
+        description: |
+          Salesforce Pricebook2 (Price Books)
+          Price books define different pricing strategies for products.
+          45 records. Synced Nov 20, 2025.
+        identifier: pricebook_2
+        columns:
+          - name: id
+            description: Pricebook ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: name
+            description: Pricebook name
+          - name: is_active
+            description: Whether pricebook is currently active
+          - name: is_standard
+            description: Whether this is the standard pricebook
+          - name: description
+            description: Pricebook description
+          - name: created_date
+            description: When pricebook was created
+          - name: created_by_id
+            description: User who created the pricebook
+          - name: last_modified_date
+            description: When pricebook was last modified
+          - name: last_modified_by_id
+            description: User who last modified the pricebook
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: pricebook_entry
+        description: |
+          Salesforce PricebookEntry (Product Prices by Pricebook)
+          Defines product pricing for each pricebook. Junction of products and pricebooks.
+          931 records. Synced Nov 20, 2025.
+        identifier: pricebook_entry
+        columns:
+          - name: id
+            description: PricebookEntry ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: pricebook_2_id
+            description: Related Pricebook ID
+            data_tests:
+              - not_null
+          - name: product_2_id
+            description: Related Product ID
+            data_tests:
+              - not_null
+          - name: unit_price
+            description: Price for this product in this pricebook
+          - name: use_standard_price
+            description: Whether to use standard price
+          - name: is_active
+            description: Whether this price entry is active
+          - name: product_code
+            description: Product code from related product
+          - name: created_date
+            description: When entry was created
+          - name: created_by_id
+            description: User who created the entry
+          - name: last_modified_date
+            description: When entry was last modified
+          - name: last_modified_by_id
+            description: User who last modified the entry
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: opportunity_line_item
+        description: |
+          Salesforce OpportunityLineItem (Opportunity Products / Line Items)
+          Products and line items sold on opportunities. Junction of opportunities and pricebook entries.
+          21,195 records. Synced Nov 20, 2025.
+        identifier: opportunity_line_item
+        columns:
+          - name: id
+            description: OpportunityLineItem ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: opportunity_id
+            description: Related Opportunity ID
+            data_tests:
+              - not_null
+          - name: pricebook_entry_id
+            description: Related PricebookEntry ID (product pricing)
+            data_tests:
+              - not_null
+          - name: product_2_id
+            description: Related Product ID
+          - name: quantity
+            description: Quantity of product sold
+          - name: unit_price
+            description: Sales price per unit
+          - name: total_price
+            description: Total line item price
+          - name: product_arr_c
+            description: Annual Recurring Revenue for this line item
+          - name: created_date
+            description: When line item was created
+          - name: created_by_id
+            description: User who created the line item
+          - name: last_modified_date
+            description: When line item was last modified
+          - name: last_modified_by_id
+            description: User who last modified the line item
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: quote_line_item
+        description: |
+          Salesforce QuoteLineItem (Quote Line Items)
+          Products on quotes. Links quotes to pricebook entries and opportunity line items.
+          0 records (empty table, structure maintained for future use). Synced Nov 20, 2025.
+        identifier: quote_line_item
+        columns:
+          - name: id
+            description: QuoteLineItem ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: quote_id
+            description: Related Quote ID
+          - name: pricebook_entry_id
+            description: Related PricebookEntry ID (product pricing)
+          - name: opportunity_line_item_id
+            description: Related OpportunityLineItem ID
+          - name: product_2_id
+            description: Related Product ID
+          - name: quantity
+            description: Quantity of product
+          - name: unit_price
+            description: Sales price per unit
+          - name: total_price
+            description: Total line item price
+          - name: line_number
+            description: Line number (auto-generated)
+          - name: created_date
+            description: When line item was created
+          - name: created_by_id
+            description: User who created the line item
+          - name: last_modified_date
+            description: When line item was last modified
+          - name: last_modified_by_id
+            description: User who last modified the line item
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: adroll_user_summary_c
+        description: |
+          Salesforce adroll__User_Summary__c (RollWorks User Summary)
+          User-level advertising metrics from RollWorks. 620 records. Synced Nov 20, 2025.
+        identifier: adroll_user_summary_c
+        columns:
+          - name: id
+            description: RollWorks User Summary ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: adroll_contact_c
+            description: Related Contact ID
+          - name: adroll_lead_c
+            description: Related Lead ID
+          - name: adroll_email_c
+            description: User email
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: adroll_account_summary_c
+        description: |
+          Salesforce adroll__Account_Summary__c (RollWorks Account Summary/Advertising)
+          Account-level advertising metrics from RollWorks. 2,344 records. Synced Nov 20, 2025.
+        identifier: adroll_account_summary_c
+        columns:
+          - name: id
+            description: RollWorks Account Summary ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: adroll_account_c
+            description: Related Account ID
+          - name: adroll_website_c
+            description: Account website (external ID)
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: adroll_ad_roll_tracking_data_c
+        description: |
+          Salesforce adroll__AdRoll_Tracking_Data__c (RollWorks Tracking Data)
+          Daily granular tracking data from RollWorks. 10,114 records. Synced Nov 20, 2025.
+        identifier: adroll_ad_roll_tracking_data_c
+        columns:
+          - name: id
+            description: RollWorks Tracking Data ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: adroll_contact_c
+            description: Related Contact ID
+          - name: adroll_lead_c
+            description: Related Lead ID
+          - name: adroll_email_c
+            description: User email (external ID)
+          - name: adroll_date_c
+            description: Date of tracking data
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: adroll_roll_works_tracking_data_aggregation_c
+        description: |
+          Salesforce adroll__RollWorks_Tracking_Data_Aggregation__c
+          Aggregated RollWorks advertising metrics. 105,385 records. Synced Nov 20, 2025.
+        identifier: adroll_roll_works_tracking_data_aggregation_c
+        columns:
+          - name: id
+            description: RollWorks Tracking Aggregation ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: adroll_account_c
+            description: Related Account ID
+          - name: adroll_date_c
+            description: Date of aggregated data
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted
+
+      - name: adroll_ad_roll_account_field_mapping_c
+        description: |
+          Salesforce adroll__AdRoll_Account_Field_Mapping__c
+          Field mapping configuration for RollWorks. 0 records (empty). Synced Nov 20, 2025.
+        identifier: adroll_ad_roll_account_field_mapping_c
+        columns:
+          - name: id
+            description: Field Mapping ID (primary key)
+            data_tests:
+              - not_null
+              - unique
+          - name: adroll_roll_works_customer_field_c
+            description: RollWorks customer field name
+          - name: adroll_sfdc_account_field_c
+            description: SFDC account field name (unique)
+          - name: _fivetran_synced
+          - name: _fivetran_deleted
+          - name: is_deleted

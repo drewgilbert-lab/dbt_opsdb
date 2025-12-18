@@ -1,0 +1,41 @@
+name: opsdb
+version: 1.0.0
+config-version: 2
+profile: opsdb
+vars:
+  source_schema: load_delta
+  source_catalog: null
+  should_sample_data: true
+  external_location_root: null
+  pyspark_dbt_utils_workspace_path: null
+  num_workers: null
+model-paths:
+- models
+- unit-tests
+analysis-paths:
+- analyses
+test-paths:
+- tests
+seed-paths:
+- seeds
+macro-paths:
+- macros
+snapshot-paths:
+- snapshots
+clean-targets:
+- target
+- dbt_packages
+models:
+  opsdb:
+    +persist_docs:
+      relation: true
+      columns: true
+    gtm:
+      staging:
+        +schema: gtm_staging
+      core:
+        +schema: gtm_core
+      mart:
+        +schema: gtm_mart
+flags:
+  require_explicit_package_overrides_for_builtin_materializations: false

@@ -1,0 +1,21 @@
+version: 2
+
+# GTM Mart Layer
+#
+# This layer is currently empty as we are validating the core layer first.
+#
+# Per team guidance: "We shouldn't be creating mart tables unless we
+# absolutely know it is correct. The first problem to solve is ensuring
+# we have the right data and it is correct before we do anything else."
+#
+# Once the core layer (gtm_core) has been validated:
+# - Field mappings confirmed against Google Sheets/Salesforce spec
+# - Join logic reviewed and approved
+# - Calculations verified for correctness
+#
+# Then we can create mart models with confidence that they are built
+# on a solid foundation.
+#
+# All analysis should currently be done directly against gtm_core models.
+
+models: []

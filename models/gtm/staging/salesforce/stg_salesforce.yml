@@ -1,0 +1,345 @@
+version: 2
+
+models:
+  - name: stg_salesforce__opportunity
+    description: |
+      Cleaned and standardized Salesforce opportunities from raw layer.
+
+      Transformations applied:
+      - Remove soft deletes (is_deleted = true, _fivetran_deleted = true)
+      - Deduplicate by ID (keep most recent _fivetran_synced)
+      - Normalize opportunity types (New Business, Renewal, Expansion)
+      - Calculate days_in_current_stage
+
+      Expected record changes from raw:
+      - Soft deletes removed: ~50 records
+      - Fivetran deletes removed: ~20 records
+      - Deduplication: ~5 records
+      - TOTAL EXPECTED DROP: ~75 records
+
+    data_tests:
+      # CRITICAL: Catch unexpected data loss between raw and staging
+      - dbt_utils.expression_is_true:
+          name: staging_opp_count_within_expected_range_of_raw
+          expression: |
+            (SELECT COUNT(*) FROM {{ ref('stg_salesforce__opportunity') }}) >=
+            (SELECT COUNT(*) FROM {{ source('salesforce', 'opportunity') }}) - 150
+          config:
+            severity: error
+            error_if: ">0"
+          meta:
+            description: "Ensures staging has at least 90% of raw records (allows for ~10% soft deletes/dedup)"
+            alert_message: "🚨 CRITICAL: Staging has significantly fewer records than raw. Expected ~75 drops max, found more. Check for bad filters or joins."
+
+    columns:
+      - name: opportunity_id
+        description: Salesforce Opportunity ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: staging_opp_exists_in_raw
+              to: source('salesforce', 'opportunity')
+              field: id
+              config:
+                where: "is_deleted = false AND COALESCE(_fivetran_deleted, false) = false"
+
+      - name: opportunity_name
+        description: Opportunity name/title
+        data_tests:
+          - not_null
+
+      - name: account_id
+        description: Related Account ID
+        data_tests:
+          - not_null
+          - relationships:
+              to: source('salesforce', 'account')
+              field: id
+
+      - name: opportunity_type_normalized
+        description: Normalized opportunity type (New Business, Renewal, Expansion, POC)
+        data_tests:
+          - accepted_values:
+              values: ['New Business', 'Renewal', 'Expansion', 'POC', null]
+              config:
+                severity: warn
+
+  - name: stg_salesforce__task
+    description: |
+      Cleaned and standardized Salesforce tasks (emails, calls, meetings).
+
+      Key transformations:
+      - 5-tier email direction parsing (Inbound, Outbound, Unknown)
+      - Remove soft deletes
+      - Parse activity dates
+
+      Email parsing achieves 91% accuracy (9% remain Unknown).
+
+    columns:
+      - name: task_id
+        description: Salesforce Task ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: email_direction
+        description: Parsed email direction (Inbound, Outbound, Unknown)
+        data_tests:
+          - accepted_values:
+              values: ['Inbound', 'Outbound', 'Unknown', null]
+
+  - name: stg_salesforce__opportunity_contact_role
+    description: |
+      Links contacts to opportunities for indirect activity attribution.
+
+      Critical for dual attribution strategy (captures 39% of activities).
+
+    columns:
+      - name: opportunity_contact_role_id
+        description: Primary key
+        data_tests:
+          - not_null
+          - unique
+
+      - name: opportunity_id
+        description: Related Opportunity ID
+        data_tests:
+          - not_null
+          - relationships:
+              to: source('salesforce', 'opportunity')
+              field: id
+
+      - name: contact_id
+        description: Related Contact ID
+        data_tests:
+          - not_null
+          - relationships:
+              to: source('salesforce', 'contact')
+              field: id
+
+  - name: stg_salesforce__pricebook_2
+    description: |
+      Cleaned and standardized Salesforce pricebooks from raw layer.
+
+      Transformations applied:
+      - Remove soft deletes (is_deleted = true, _fivetran_deleted = true)
+      - Deduplicate by ID (keep most recent _fivetran_synced)
+
+      Field count: 16 fields
+      Specification: SFDC Objects + Fields - Price Book.csv
+
+    columns:
+      - name: id
+        description: Pricebook ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: name
+        description: Pricebook name
+        data_tests:
+          - not_null
+
+      - name: is_active
+        description: Whether pricebook is currently active
+
+      - name: is_standard
+        description: Whether this is the standard pricebook
+
+  - name: stg_salesforce__pricebook_entry
+    description: |
+      Cleaned and standardized Salesforce pricebook entries from raw layer.
+
+      Transformations applied:
+      - Remove soft deletes (is_deleted = true, _fivetran_deleted = true)
+      - Deduplicate by ID (keep most recent _fivetran_synced)
+
+      Field count: 17 fields
+      Specification: SFDC Objects + Fields - Price Book Entry.csv
+
+    columns:
+      - name: id
+        description: PricebookEntry ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: pricebook_2_id
+        description: Related Pricebook ID
+        data_tests:
+          - not_null
+          - relationships:
+              to: source('salesforce', 'pricebook_2')
+              field: id
+
+      - name: product_2_id
+        description: Related Product ID
+        data_tests:
+          - not_null
+
+      - name: unit_price
+        description: Price for this product in this pricebook
+
+      - name: is_active
+        description: Whether this price entry is active
+
+  - name: stg_salesforce__opportunity_line_item
+    description: |
+      Cleaned and standardized Salesforce opportunity line items from raw layer.
+
+      Transformations applied:
+      - Remove soft deletes (is_deleted = true, _fivetran_deleted = true)
+      - Deduplicate by ID (keep most recent _fivetran_synced)
+
+      Field count: 88 fields
+      Specification: SFDC Objects + Fields - Opportunity Product.csv
+
+    columns:
+      - name: id
+        description: OpportunityLineItem ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: opportunity_id
+        description: Related Opportunity ID
+        data_tests:
+          - not_null
+          - relationships:
+              to: source('salesforce', 'opportunity')
+              field: id
+
+      - name: pricebook_entry_id
+        description: Related PricebookEntry ID
+        data_tests:
+          - not_null
+          - relationships:
+              to: source('salesforce', 'pricebook_entry')
+              field: id
+
+      - name: product_2_id
+        description: Related Product ID
+
+      - name: quantity
+        description: Quantity of product sold
+
+      - name: unit_price
+        description: Sales price per unit
+
+      - name: total_price
+        description: Total line item price
+
+      - name: product_arr_c
+        description: Annual Recurring Revenue for this line item
+
+  - name: stg_salesforce__quote_line_item
+    description: |
+      Cleaned and standardized Salesforce quote line items from raw layer.
+
+      Transformations applied:
+      - Remove soft deletes (is_deleted = true, _fivetran_deleted = true)
+      - Deduplicate by ID (keep most recent _fivetran_synced)
+
+      Note: This table is currently empty (0 rows) but structure is maintained
+      for future data.
+
+      Field count: 36 fields
+      Specification: SFDC Objects + Fields - Quote Line Item.csv
+
+    columns:
+      - name: id
+        description: QuoteLineItem ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: quote_id
+        description: Related Quote ID
+
+      - name: pricebook_entry_id
+        description: Related PricebookEntry ID
+        data_tests:
+          - relationships:
+              to: source('salesforce', 'pricebook_entry')
+              field: id
+
+      - name: opportunity_line_item_id
+        description: Related OpportunityLineItem ID
+
+      - name: product_2_id
+        description: Related Product ID
+
+      - name: quantity
+        description: Quantity of product
+
+      - name: unit_price
+        description: Sales price per unit
+
+      - name: total_price
+        description: Total line item price
+
+  - name: stg_salesforce__adroll_user_summary_c
+    description: |
+      Cleaned RollWorks user summary data. User-level advertising metrics.
+      Field count: 23 fields. Specification: SFDC Objects + Fields - RollWorks User Summary.csv
+    columns:
+      - name: id
+        description: RollWorks User Summary ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+      - name: adroll_email_c
+        description: User email
+
+  - name: stg_salesforce__adroll_account_summary_c
+    description: |
+      Cleaned RollWorks account summary data. Account-level advertising metrics.
+      Field count: 24 fields. Specification: SFDC Objects + Fields - RollWorks Advertising.csv
+    columns:
+      - name: id
+        description: RollWorks Account Summary ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+      - name: adroll_account_c
+        description: Related Account ID
+
+  - name: stg_salesforce__adroll_ad_roll_tracking_data_c
+    description: |
+      Cleaned RollWorks tracking data. Daily granular advertising metrics by user.
+      Field count: 27 fields. Specification: SFDC Objects + Fields - RollWorks Tracking Data.csv
+    columns:
+      - name: id
+        description: RollWorks Tracking Data ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+      - name: adroll_date_c
+        description: Date of tracking data
+      - name: adroll_email_c
+        description: User email (external ID)
+
+  - name: stg_salesforce__adroll_roll_works_tracking_data_aggregation_c
+    description: |
+      Cleaned RollWorks aggregated tracking data. Largest AdRoll dataset.
+      Field count: 26 fields. Specification: SFDC Objects + Fields - RollWorks Tracking Data Aggregation.csv
+    columns:
+      - name: id
+        description: RollWorks Tracking Aggregation ID (primary key)
+        data_tests:
+          - not_null
+          - unique
+      - name: adroll_date_c
+        description: Date of aggregated data
+
+  - name: stg_salesforce__adroll_ad_roll_account_field_mapping_c
+    description: |
+      Cleaned RollWorks field mapping configuration. Empty table for future use.
+      Field count: 13 fields. Specification: SFDC Objects + Fields - RollWorks Account Field Mapping.csv
+    columns:
+      - name: id
+        description: Field Mapping ID (primary key)
+        data_tests:
+          - not_null
+          - unique
