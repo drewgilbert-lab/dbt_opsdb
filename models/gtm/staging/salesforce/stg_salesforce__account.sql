@@ -9,12 +9,8 @@
     Staging model for Salesforce Accounts
     Source: rev_ops_prod.gtm_raw.account (via Fivetran)
 
-    IMPORTANT: This model ONLY includes fields specified in Google Sheets specification
-    "SFDC Objects + Fields - Account.csv"
-
-    Field count: 42 fields (as of 2025-11-07)
+    Field count: 54 fields (as of 2025-12-18)
     Note: BillingAddress is a compound field and not included (components are: BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry, BillingLatitude, BillingLongitude)
-    Any fields not in the Google Sheets spec have been removed.
 
     Transformations:
     - Deduplication by id using _fivetran_synced
@@ -91,6 +87,24 @@ deduplicated as (
         pendo_exports_c,
         pendo_account_id_c,
         pendo_days_since_last_login_c,
+
+        -- MadKudu Account Engagement
+        mk_account_engagement_c,
+        mk_account_engagement_score_c,
+        mk_account_engagement_segment_c,
+        mk_account_engagement_signals_c,
+
+        -- MadKudu Customer Fit
+        mk_customer_fit_c,
+        mk_customer_fit_score_c,
+        mk_customer_fit_segment_c,
+        mk_customer_fit_signals_c,
+
+        -- HG Insights Scoring
+        hg_insights_hg_account_fit_score_c,
+        hg_insights_hg_account_fit_score_details_c,
+        hg_insights_hg_account_intent_score_c,
+        hg_insights_hg_account_intent_score_details_c,
 
         -- Fivetran Metadata
         _fivetran_synced as last_synced_at,

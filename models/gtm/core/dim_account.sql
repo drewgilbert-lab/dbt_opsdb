@@ -8,16 +8,13 @@
 /*
     Account Dimension
 
-    Purpose: Account data from Salesforce - EXACT MATCH to Google Sheets specification
+    Purpose: Account data from Salesforce
     Source: stg_salesforce__account
     Grain: One row per account
 
-    IMPORTANT: This model ONLY includes fields from "SFDC Objects + Fields - Account.csv"
-    Field count: 42 fields from Salesforce + minimal metadata
+    Field count: 54 fields from Salesforce + minimal metadata
     Note: BillingAddress compound field excluded (components included)
-
-    Google Sheets Specification: /Users/eliakemp/Downloads/SFDC Objects + Fields - Account.csv
-    Last Updated: 2025-11-07
+    Last Updated: 2025-12-18
 */
 
 SELECT
@@ -85,6 +82,24 @@ SELECT
     pendo_exports_c,
     pendo_account_id_c,
     pendo_days_since_last_login_c,
+
+    -- MadKudu Account Engagement
+    mk_account_engagement_c,
+    mk_account_engagement_score_c,
+    mk_account_engagement_segment_c,
+    mk_account_engagement_signals_c,
+
+    -- MadKudu Customer Fit
+    mk_customer_fit_c,
+    mk_customer_fit_score_c,
+    mk_customer_fit_segment_c,
+    mk_customer_fit_signals_c,
+
+    -- HG Insights Scoring
+    hg_insights_hg_account_fit_score_c,
+    hg_insights_hg_account_fit_score_details_c,
+    hg_insights_hg_account_intent_score_c,
+    hg_insights_hg_account_intent_score_details_c,
 
     -- Metadata
     last_synced_at,

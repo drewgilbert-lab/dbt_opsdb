@@ -8,16 +8,13 @@
 /*
     Task Fact Table
 
-    Purpose: Track sales activities - EXACT MATCH to Google Sheets specification
+    Purpose: Track sales activities
     Source: stg_salesforce__task
     Grain: One row per task
 
-    IMPORTANT: This model ONLY includes fields from "SFDC Objects + Fields - Task.csv"
-    Field count: 67 fields from Salesforce + minimal metadata
+    Field count: 82 fields from Salesforce + minimal metadata
     Note: Created_By_Weeks_in_the_Business__c was in CSV but doesn't exist in database - removed
-
-    Google Sheets Specification: /Users/eliakemp/Downloads/SFDC Objects + Fields - Task.csv
-    Last Updated: 2025-11-07
+    Last Updated: 2025-12-18
 */
 
 SELECT
@@ -38,6 +35,10 @@ SELECT
     is_closed,
     description,
 
+    -- Record Structure
+    child_record_c,
+    is_recurrence,
+
     -- Task Dates
     activity_date,
     created_date,
@@ -55,6 +56,7 @@ SELECT
     call_answered_c,
     call_started_c,
     stage_of_call_reached_c,
+    call_recording_url_2_c,
 
     -- Meeting Fields
     meeting_type_c,
@@ -65,6 +67,8 @@ SELECT
     meeting_cancelled_c,
     is_no_show_c,
     next_actions_c,
+    meeting_booked_source_c,
+    meeting_conversion_status_c_c,
 
     -- Prospect Fields
     prospect_persona_new_c,
@@ -96,6 +100,15 @@ SELECT
     bounced_at_c,
     bounced_reason_c,
 
+    -- Weflow Integration
+    weflow_weflow_calendar_event_data_c,
+    weflow_weflow_calendar_event_id_c,
+    weflow_weflow_calendar_original_event_id_c,
+    weflow_weflow_email_message_id_c,
+    weflow_weflow_email_original_message_id_c,
+    weflow_weflow_task_email_last_open_date_c,
+    weflow_weflow_task_email_open_count_c,
+
     -- Task Timing Fields
     date_task_started_c,
     date_task_completed_c,
@@ -118,6 +131,13 @@ SELECT
 
     -- Task Type Name
     task_type_name_c,
+
+    -- Activity Fields
+    activity_c,
+    activity_id_full_c,
+
+    -- Automation/Renewal
+    automated_renewal_notification_c,
 
     -- Metadata
     last_synced_at,

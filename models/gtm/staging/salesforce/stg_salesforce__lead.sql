@@ -9,10 +9,7 @@
     Staging model for Salesforce Lead
     Source: rev_ops_prod.gtm_raw.lead (via Fivetran)
 
-    IMPORTANT: This model ONLY includes fields specified in Google Sheets specification
-    "SFDC Objects + Fields - Lead.csv"
-
-    Field count: 52 fields (as of 2025-11-12)
+    Field count: 63 fields (as of 2025-12-18)
     Note: Address compound field not included (components not specified in CSV)
     Leads are pre-conversion prospects.
 */
@@ -92,6 +89,23 @@ deduplicated as (
         -- Third Party Integration
         adroll_roll_works_sourced_c,
         sync_to_marketo_c,
+
+        -- Marketo Customer Fit
+        mk_customer_fit_c,
+        mk_customer_fit_score_c,
+        mk_customer_fit_segment_c,
+        mk_customer_fit_signals_c,
+
+        -- Marketo Lead Engagement
+        mk_lead_engagement_c,
+        mk_lead_engagement_score_c,
+        mk_lead_engagement_segment_c,
+        mk_lead_engagement_signals_c,
+
+        -- Marketo Lead Grade
+        mk_lead_grade_c,
+        mk_lead_grade_score_c,
+        mk_lead_grade_segment_c,
 
         -- UTM Parameters
         utm_campaign_c,

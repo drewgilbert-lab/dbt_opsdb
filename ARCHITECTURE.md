@@ -54,7 +54,7 @@
 └───────┬───────┴───────┬───────┴───────┬───────┴───────┬───────┘
         │               │               │               │
         │ Fivetran      │ Fivetran      │ Fivetran      │ Fivetran
-        │ (Daily 21:49) │               │               │
+        │ (Every 6hrs)  │               │               │
         ↓               ↓               ↓               ↓
 ┌──────────────────────────────────────────────────────────────────┐
 │                    LAYER 1: gtm_raw                               │
@@ -618,37 +618,38 @@ rev_ops_prod (catalog)
 
 ## Data Refresh & Scheduling
 
-### Automated Daily Sync
+### Current State (Manual)
 
 **Fivetran Sync:**
-- Frequency: Daily at 21:49 PST
+- Frequency: Every 6 hours (automated)
 - Method: Incremental sync with Change Data Capture
 - Destination: `gtm_raw` schema
 - Management: External Fivetran service
 
-**dbt Transformations:**
-- Frequency: Daily at 21:59 PST (10 minutes after Fivetran sync)
+**dbt Runs:**
+- Frequency: On-demand (manual)
 - Command: `dbt run`
-- Duration: ~4-5 minutes for full refresh
-- Trigger: Automated schedule
+- Duration: ~2-3 minutes for full refresh
+- Trigger: Analyst runs manually when fresh data needed
 
 ### Data Freshness
 
-- **gtm_raw**: Updated daily at 21:49 PST (Fivetran)
-- **gtm_staging**: Updated daily at 21:59 PST (dbt)
-- **gtm_core**: Updated daily at 21:59 PST (dbt)
+- **gtm_raw**: Always fresh (Fivetran manages)
+- **gtm_staging**: As fresh as last `dbt run`
+- **gtm_core**: As fresh as last `dbt run`
 
-**To manually refresh data (if needed):**
+**To get latest data:**
 ```bash
 dbt run
 ```
 
-### Schedule Summary
+### Future State (Automated)
 
-| Process | Time (PST) | Frequency |
-|---------|------------|-----------|
-| Fivetran sync | 21:49 | Daily |
-| dbt transformations | 21:59 | Daily |
+Potential scheduling options:
+- **Databricks Jobs**: Schedule `dbt run` via Databricks workflow
+- **Airflow**: Orchestrate dbt via Airflow DAG
+- **dbt Cloud**: Managed scheduling (requires dbt Cloud account)
+- **Cron**: Simple cron job on server
 
 ---
 

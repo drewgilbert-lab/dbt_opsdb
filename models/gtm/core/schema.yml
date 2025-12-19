@@ -188,6 +188,30 @@ models:
       by Pendo.
   - name: last_synced_at
     description: last_synced_at field
+  - name: mk_account_engagement_c
+    description: MadKudu account engagement classification
+  - name: mk_account_engagement_score_c
+    description: MadKudu account engagement score (numeric)
+  - name: mk_account_engagement_segment_c
+    description: MadKudu account engagement segment
+  - name: mk_account_engagement_signals_c
+    description: MadKudu account engagement signals/factors
+  - name: mk_customer_fit_c
+    description: MadKudu customer fit classification
+  - name: mk_customer_fit_score_c
+    description: MadKudu customer fit score (numeric)
+  - name: mk_customer_fit_segment_c
+    description: MadKudu customer fit segment
+  - name: mk_customer_fit_signals_c
+    description: MadKudu customer fit signals/factors
+  - name: hg_insights_hg_account_fit_score_c
+    description: HG Insights account fit score
+  - name: hg_insights_hg_account_fit_score_details_c
+    description: HG Insights account fit score details/breakdown
+  - name: hg_insights_hg_account_intent_score_c
+    description: HG Insights account intent score
+  - name: hg_insights_hg_account_intent_score_details_c
+    description: HG Insights account intent score details/breakdown
 - name: dim_contact
   description: |
     People at accounts (existing customers/prospects). One row per contact.
@@ -459,6 +483,28 @@ models:
     description: utm_term_c field
   - name: last_synced_at
     description: last_synced_at field
+  - name: mk_customer_fit_c
+    description: Marketo customer fit classification
+  - name: mk_customer_fit_score_c
+    description: Marketo customer fit score (numeric)
+  - name: mk_customer_fit_segment_c
+    description: Marketo customer fit segment
+  - name: mk_customer_fit_signals_c
+    description: Marketo customer fit signals/factors
+  - name: mk_lead_engagement_c
+    description: Marketo lead engagement classification
+  - name: mk_lead_engagement_score_c
+    description: Marketo lead engagement score (numeric)
+  - name: mk_lead_engagement_segment_c
+    description: Marketo lead engagement segment
+  - name: mk_lead_engagement_signals_c
+    description: Marketo lead engagement signals/factors
+  - name: mk_lead_grade_c
+    description: Marketo lead grade classification
+  - name: mk_lead_grade_score_c
+    description: Marketo lead grade score (numeric)
+  - name: mk_lead_grade_segment_c
+    description: Marketo lead grade segment
 - name: dim_campaign
   description: |
     Marketing campaigns. One row per campaign.
@@ -764,6 +810,130 @@ models:
     description: ID of the User who created this record.
   - name: last_synced_at
     description: last_synced_at field
+  - name: type
+    description: Opportunity type (New Business, Renewal, etc.)
+  - name: additional_use_cases_c
+    description: Additional use cases beyond the primary use case
+  - name: primary_use_case_implemented_c
+    description: Primary use case that has been implemented
+  - name: authority_c
+    description: MEDDPICC - Authority level of the decision maker
+  - name: budget_c
+    description: MEDDPICC - Budget information for the opportunity
+  - name: budget_approval_c
+    description: MEDDPICC - Budget approval status
+  - name: budget_holder_c
+    description: MEDDPICC - Person who holds the budget
+  - name: champion_c
+    description: MEDDPICC - Internal champion supporting the deal
+  - name: compelling_event_c
+    description: MEDDPICC - Compelling event driving the purchase timeline
+  - name: decision_criteria_c
+    description: MEDDPICC - Criteria used to make the purchase decision
+  - name: decision_maker_c
+    description: MEDDPICC - The decision maker for the opportunity
+  - name: decision_process_c
+    description: MEDDPICC - The decision process for the opportunity
+  - name: economic_buyer_c
+    description: MEDDPICC - The economic buyer for the opportunity
+  - name: arr_renewal_closed_lost_c
+    description: ARR from renewal opportunities that were closed lost
+  - name: arr_renewal_closed_won_c
+    description: ARR from renewal opportunities that were closed won
+  - name: arr_renewal_pipeline_c
+    description: ARR from renewal opportunities in pipeline
+  - name: expansion_arr_c
+    description: Expansion ARR amount
+  - name: new_expansion_arr_c
+    description: Combined new and expansion ARR
+  - name: prev_contract_arr_c
+    description: ARR from the previous contract
+  - name: idate_c
+    description: Initial date field
+  - name: contract_end_or_opt_out_date_c
+    description: Contract end date or opt-out date
+  - name: contract_last_sent_date_c
+    description: Date the contract was last sent
+  - name: contract_sent_c
+    description: Whether the contract has been sent
+  - name: contract_start_date_c
+    description: Contract start date
+  - name: term_months_c
+    description: Contract term length in months
+  - name: termination_date_c
+    description: Contract termination date
+  - name: special_terms_c
+    description: Special terms in the contract
+  - name: approved_proposal_c
+    description: Whether the proposal has been approved
+  - name: deal_desk_notes_c
+    description: Notes from deal desk
+  - name: deal_hub_create_subscription_c
+    description: Deal Hub subscription creation flag
+  - name: deal_hub_quote_id_c
+    description: Deal Hub quote identifier
+  - name: dealroom_created_c
+    description: Whether a dealroom has been created
+  - name: dealroom_status_c
+    description: Status of the dealroom
+  - name: purchase_order_c
+    description: Purchase order number
+  - name: quote_created_c
+    description: Whether a quote has been created
+  - name: trial_contact_role_rollup_c
+    description: Rollup of trial contact roles
+  - name: trial_end_date_c
+    description: Trial end date
+  - name: trial_request_date_c
+    description: Date trial was requested
+  - name: trial_start_date_c
+    description: Trial start date
+  - name: sdr_c
+    description: SDR assigned to the opportunity
+  - name: sdr_that_sourced_opp_c
+    description: SDR who sourced the opportunity
+  - name: client_advisor_review_c
+    description: Client advisor review status
+  - name: client_advisory_request_date_c
+    description: Date client advisory was requested
+  - name: sales_engineer_notes_c
+    description: Notes from the sales engineer
+  - name: competitors_c
+    description: Competitors being evaluated
+  - name: who_else_are_they_considering_c
+    description: Other vendors being considered
+  - name: tech_stack_c
+    description: Customer's technology stack
+  - name: customer_reference_c
+    description: Customer reference information
+  - name: desired_outcome_for_client_c
+    description: Desired outcome the client wants to achieve
+  - name: ideal_customer_profile_c
+    description: ICP score or classification
+  - name: full_access_platform_seat_holder_c
+    description: Full access platform seat holder
+  - name: size_the_problem_c
+    description: Size of the problem being solved
+  - name: secondary_business_challenge_c
+    description: Secondary business challenge being addressed
+  - name: checklist_complete_c
+    description: Whether the deal checklist is complete
+  - name: engaged_procurement_c
+    description: Whether procurement is engaged
+  - name: risk_category_c
+    description: Risk category for the opportunity
+  - name: signer_c
+    description: Who will sign the contract
+  - name: next_step
+    description: Next step in the sales process
+  - name: next_steps_history_c
+    description: History of next steps
+  - name: four_four_ai_c
+    description: 44 AI field
+  - name: vitally_opportunity_pulse_c
+    description: Vitally opportunity health pulse score
+  - name: vitally_opportunity_pulse_notes_c
+    description: Notes for Vitally opportunity pulse
 - name: fct_task
   description: |
     Tasks and activities (calls, emails, to-dos). One row per task.
@@ -919,6 +1089,36 @@ models:
     description: task_type_name_c field
   - name: last_synced_at
     description: last_synced_at field
+  - name: child_record_c
+    description: Indicates if this is a child record
+  - name: is_recurrence
+    description: Whether the task is a recurring task
+  - name: call_recording_url_2_c
+    description: URL to the call recording
+  - name: meeting_booked_source_c
+    description: Source of the meeting booking
+  - name: meeting_conversion_status_c_c
+    description: Meeting conversion status
+  - name: weflow_weflow_calendar_event_data_c
+    description: Weflow calendar event data
+  - name: weflow_weflow_calendar_event_id_c
+    description: Weflow calendar event ID
+  - name: weflow_weflow_calendar_original_event_id_c
+    description: Weflow calendar original event ID
+  - name: weflow_weflow_email_message_id_c
+    description: Weflow email message ID
+  - name: weflow_weflow_email_original_message_id_c
+    description: Weflow email original message ID
+  - name: weflow_weflow_task_email_last_open_date_c
+    description: Last open date for task email tracked by Weflow
+  - name: weflow_weflow_task_email_open_count_c
+    description: Number of times task email was opened tracked by Weflow
+  - name: activity_c
+    description: Activity classification
+  - name: activity_id_full_c
+    description: Full activity identifier
+  - name: automated_renewal_notification_c
+    description: Automated renewal notification flag
 - name: fct_event
   description: |
     Calendar events (meetings, calls). One row per event.
@@ -1021,6 +1221,34 @@ models:
     description: html_body field
   - name: headers
     description: headers field
+  - name: from_id
+    description: Salesforce User ID of the sender
+  - name: parent_id
+    description: Parent record ID (related object)
+  - name: reply_to_email_message_id
+    description: ID of the email this message is replying to
+  - name: name
+    description: Email message name/label
+  - name: client_thread_identifier
+    description: Client-side thread identifier for email grouping
+  - name: automation_type
+    description: Type of automation that sent the email
+  - name: is_client_managed
+    description: Whether the email is managed by the client
+  - name: is_externally_visible
+    description: Whether the email is visible to external users
+  - name: source
+    description: Source system or method that created the email
+  - name: attachment_ids
+    description: Comma-separated list of attachment IDs
+  - name: weflow_tracking_weflow_last_open_date_c
+    description: Last open date tracked by Weflow
+  - name: weflow_tracking_weflow_open_count_c
+    description: Number of times opened tracked by Weflow
+  - name: last_modified_by_id
+    description: User ID who last modified the record
+  - name: last_modified_date
+    description: Timestamp of last modification
 - name: fct_campaign_member
   description: |
     Leads/contacts in campaigns. One row per campaign member.

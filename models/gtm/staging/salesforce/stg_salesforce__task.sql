@@ -9,10 +9,7 @@
     Staging model for Salesforce Task
     Source: rev_ops_prod.gtm_raw.task (via Fivetran)
 
-    IMPORTANT: This model ONLY includes fields specified in Google Sheets specification
-    "SFDC Objects + Fields - Task.csv"
-
-    Field count: 67 fields (as of 2025-11-07)
+    Field count: 82 fields (as of 2025-12-18)
     Note: Created_By_Weeks_in_the_Business__c is in CSV but doesn't exist in database - removed
     Tasks track sales activities including calls, emails, and meetings.
 */
@@ -40,6 +37,10 @@ deduplicated as (
         is_closed,
         description,
 
+        -- Record Structure
+        child_record_c,
+        is_recurrence,
+
         -- Task Dates
         activity_date,
         created_date,
@@ -57,6 +58,7 @@ deduplicated as (
         call_answered_c,
         call_started_c,
         stage_of_call_reached_c,
+        call_recording_url_2_c,
 
         -- Meeting Fields
         meeting_type_c,
@@ -67,6 +69,8 @@ deduplicated as (
         meeting_cancelled_c,
         is_no_show_c,
         next_actions_c,
+        meeting_booked_source_c,
+        meeting_conversion_status_c_c,
 
         -- Prospect Fields
         prospect_persona_new_c,
@@ -98,6 +102,15 @@ deduplicated as (
         bounced_at_c,
         bounced_reason_c,
 
+        -- Weflow Integration
+        weflow_weflow_calendar_event_data_c,
+        weflow_weflow_calendar_event_id_c,
+        weflow_weflow_calendar_original_event_id_c,
+        weflow_weflow_email_message_id_c,
+        weflow_weflow_email_original_message_id_c,
+        weflow_weflow_task_email_last_open_date_c,
+        weflow_weflow_task_email_open_count_c,
+
         -- Task Timing Fields
         date_task_started_c,
         date_task_completed_c,
@@ -120,6 +133,13 @@ deduplicated as (
 
         -- Task Type Name
         task_type_name_c,
+
+        -- Activity Fields
+        activity_c,
+        activity_id_full_c,
+
+        -- Automation/Renewal
+        automated_renewal_notification_c,
 
         -- Fivetran Metadata
         _fivetran_synced as last_synced_at,

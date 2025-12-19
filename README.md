@@ -15,6 +15,8 @@
 
 ## Overview
 
+**GitHub Repository:** [https://github.com/drewgilbert-lab/dbt_opsdb](https://github.com/drewgilbert-lab/dbt_opsdb)
+
 opsDB is a self-contained data transformation project that processes GTM data in Databricks. This repository is fully independent with zero external dependencies, enabling anyone to clone, modify, and deploy transformations.
 
 ### What's Inside
@@ -352,6 +354,20 @@ When modifying models:
 4. **Test**: Run `dbt test` before committing
 5. **Verify**: Check Databricks tables directly
 
+### Pushing Changes to GitHub
+
+This repository (`drewgilbert-lab/dbt_opsdb`) contains only the `opsDB` folder contents. When pushing updates:
+
+```bash
+# From inside the opsDB directory
+cd opsDB
+git add .
+git commit -m "Your commit message"
+git push origin main
+```
+
+> **Important:** Only push the contents of the `opsDB` folder to this repository. Do not include parent directories.
+
 ## Package Dependencies
 
 - **dbt-utils** (1.3.0) - Common dbt utility macros
@@ -375,7 +391,8 @@ Internal project - not for external distribution
 
 ---
 
-**Last Updated:** 2025-11-20
+**Last Updated:** 2025-12-18
 **dbt Version:** 1.8.6
 **Databricks Catalog:** rev_ops_prod
 **Total Models:** 48 (25 staging + 23 core)
+**GitHub:** [drewgilbert-lab/dbt_opsdb](https://github.com/drewgilbert-lab/dbt_opsdb)

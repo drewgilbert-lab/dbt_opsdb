@@ -15,9 +15,11 @@ Complete guide for setting up your opsDB development environment for GTM data tr
 ### 1. Clone Repository
 
 ```bash
-git clone <your-opsdb-repo-url>
-cd opsDB
+git clone https://github.com/drewgilbert-lab/dbt_opsdb.git
+cd dbt_opsdb
 ```
+
+> **Note:** This repository contains only the `opsDB` dbt project. The root of this repo IS the dbt project root.
 
 ### 2. Install Python Dependencies
 
@@ -336,14 +338,10 @@ rev_ops_prod (catalog)
 
 ## Data Refresh Schedule
 
-| Process | Time (PST) | Frequency |
-|---------|------------|-----------|
-| Fivetran sync | 21:49 | Daily |
-| dbt transformations | 21:59 | Daily |
-
-- **gtm_raw:** Updated daily at 21:49 PST (Fivetran)
-- **gtm_staging/gtm_core:** Updated daily at 21:59 PST (dbt)
-- **Manual runs:** You can run `dbt run` anytime for immediate refresh
+- **Fivetran sync:** Every 6 hours (managed externally)
+- **dbt runs:** On-demand (you control when to run)
+- **Raw data:** Always fresh from Fivetran
+- **Staging/Core:** Updated when you run `dbt run`
 
 ## Troubleshooting
 
@@ -480,20 +478,35 @@ models:
 
 ### 5. Version Control
 
+**Repository:** [https://github.com/drewgilbert-lab/dbt_opsdb](https://github.com/drewgilbert-lab/dbt_opsdb)
+
 ```bash
 # Never commit these:
 - target/
 - dbt_packages/
 - logs/
+- venv/
 - ~/.dbt/profiles.yml (contains credentials)
 
 # Always commit these:
 - models/
 - macros/
+- docs/
 - dbt_project.yml
 - packages.yml
 - requirements.txt
+- *.md (documentation)
 ```
+
+**Pushing Changes:**
+```bash
+# From the opsDB (dbt_opsdb) directory
+git add .
+git commit -m "Your commit message"
+git push origin main
+```
+
+> **Note:** This repo contains only the dbt project files. The repo root IS the project root (no parent folders).
 
 ## Getting Help
 

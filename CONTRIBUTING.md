@@ -27,9 +27,9 @@
 
 ```
 Salesforce (CRM)
-    ↓ Fivetran (daily at 21:49 PST)
+    ↓ Fivetran (every 6 hours, automatic)
 gtm_raw (exact replica, managed by Fivetran)
-    ↓ dbt run (daily at 21:59 PST, automated)
+    ↓ dbt run (manual, YOU trigger this)
 gtm_staging (cleaned, deduplicated)
     ↓ dbt run (same command)
 gtm_core (business logic, ready for dashboards)
@@ -38,8 +38,8 @@ gtm_core (business logic, ready for dashboards)
 ### Key Points
 
 **Automatic (No Action Needed):**
-- **Salesforce → gtm_raw**: Fivetran syncs daily at 21:49 PST
-- **New fields in Salesforce**: Automatically appear in `gtm_raw` after next daily sync
+- **Salesforce → gtm_raw**: Fivetran syncs every 6 hours
+- **New fields in Salesforce**: Automatically appear in `gtm_raw` within 6 hours
 - **New objects in Salesforce**: Automatically appear in `gtm_raw` (if Fivetran configured)
 
 **Manual (You Must Do):**
@@ -345,7 +345,7 @@ SELECT * FROM rev_ops_prod.gtm_core.dim_product LIMIT 10;
    LIMIT 10;
    ```
 
-2. **Wait for Fivetran:** If field just created in Salesforce, wait for the next daily sync (21:49 PST).
+2. **Wait for Fivetran:** If field just created in Salesforce, wait up to 6 hours for sync.
 
 ### Step 1: Add to Staging Model
 
@@ -456,9 +456,9 @@ FROM rev_ops_prod.gtm_core.fct_opportunity;
 **Cause:** Fivetran hasn't synced yet, or field not selected for sync.
 
 **Solution:**
-1. Check Fivetran sync status (syncs daily at 21:49 PST)
+1. Check Fivetran sync status (usually syncs every 6 hours)
 2. Verify field is not excluded in Fivetran configuration
-3. Wait for next daily sync
+3. Wait for next sync cycle
 4. Manually trigger Fivetran sync if urgent (via Fivetran UI)
 
 ### Issue: Field exists in gtm_raw but not in gtm_core
@@ -841,7 +841,7 @@ Details:
 
 ### Q: How often does Fivetran sync Salesforce data?
 
-**A:** Daily at 21:49 PST. Fivetran automatically detects changes in Salesforce and syncs them to `gtm_raw`. The dbt transformations run automatically at 21:59 PST (10 minutes later).
+**A:** Every 24 hours. Fivetran automatically detects changes in Salesforce and syncs them to `gtm_raw`.
 
 ### Q: Do I need to configure Fivetran when I add a field in Salesforce?
 
@@ -856,7 +856,7 @@ FROM rev_ops_prod.gtm_raw.[object_name]
 LIMIT 10;
 ```
 
-If the field doesn't exist, wait for the next daily Fivetran sync (21:49 PST) or check Fivetran UI for sync status.
+If the field doesn't exist, wait for the next Fivetran sync (up to 24 hours) or check Fivetran UI for sync status.
 
 ### Q: Why isn't my new field showing up in dashboards?
 

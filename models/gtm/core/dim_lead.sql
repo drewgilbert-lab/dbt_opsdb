@@ -8,16 +8,13 @@
 /*
     Lead Dimension Table
 
-    Purpose: Lead data from Salesforce - EXACT MATCH to Google Sheets specification
+    Purpose: Lead data from Salesforce
     Source: stg_salesforce__lead
     Grain: One row per lead
 
-    IMPORTANT: This model ONLY includes fields from "SFDC Objects + Fields - Lead.csv"
-    Field count: 52 fields from Salesforce + minimal metadata
+    Field count: 63 fields from Salesforce + minimal metadata
     Note: Address compound field not included (components not specified in CSV)
-
-    Google Sheets Specification: /Users/eliakemp/Downloads/SFDC Objects + Fields - Lead.csv
-    Last Updated: 2025-11-12
+    Last Updated: 2025-12-18
 */
 
 SELECT
@@ -90,6 +87,23 @@ SELECT
     -- Third Party Integration
     adroll_roll_works_sourced_c,
     sync_to_marketo_c,
+
+    -- Marketo Customer Fit
+    mk_customer_fit_c,
+    mk_customer_fit_score_c,
+    mk_customer_fit_segment_c,
+    mk_customer_fit_signals_c,
+
+    -- Marketo Lead Engagement
+    mk_lead_engagement_c,
+    mk_lead_engagement_score_c,
+    mk_lead_engagement_segment_c,
+    mk_lead_engagement_signals_c,
+
+    -- Marketo Lead Grade
+    mk_lead_grade_c,
+    mk_lead_grade_score_c,
+    mk_lead_grade_segment_c,
 
     -- UTM Parameters
     utm_campaign_c,

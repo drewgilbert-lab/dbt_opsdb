@@ -9,10 +9,7 @@
     Staging model for Salesforce Email Message
     Source: rev_ops_prod.gtm_raw.email_message (via Fivetran)
 
-    IMPORTANT: This model ONLY includes fields specified in Google Sheets specification
-    "SFDC Objects + Fields - EmailMessage.csv"
-
-    Field count: 25 fields (as of 2025-11-07)
+    Field count: 39 fields (as of 2025-12-18)
     Email Message tracks emails with engagement metrics.
 */
 
@@ -27,11 +24,16 @@ deduplicated as (
         related_to_id,
         activity_id,
         created_by_id,
+        from_id,
+        parent_id,
+        reply_to_email_message_id,
 
         -- Email Identity
+        name,
         subject,
         message_identifier,
         thread_identifier,
+        client_thread_identifier,
 
         -- Email Content
         text_body,
@@ -51,8 +53,15 @@ deduplicated as (
         -- Email Status
         status,
 
+        -- Email Classification
+        automation_type,
+        is_client_managed,
+        is_externally_visible,
+        source,
+
         -- Attachments
         has_attachment,
+        attachment_ids,
 
         -- Engagement Tracking
         is_tracked,
@@ -61,9 +70,17 @@ deduplicated as (
         first_opened_date,
         last_opened_date,
 
+        -- Weflow Tracking
+        weflow_tracking_weflow_last_open_date_c,
+        weflow_tracking_weflow_open_count_c,
+
         -- Email Dates
         message_date,
         created_date,
+
+        -- Audit Fields
+        last_modified_by_id,
+        last_modified_date,
 
         -- Fivetran Metadata
         _fivetran_synced as last_synced_at,
