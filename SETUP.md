@@ -339,9 +339,41 @@ rev_ops_prod (catalog)
 ## Data Refresh Schedule
 
 - **Fivetran sync:** Every 6 hours (managed externally)
-- **dbt runs:** On-demand (you control when to run)
+- **dbt runs:** Triggered automatically in Databricks after Fivetran sync
 - **Raw data:** Always fresh from Fivetran
-- **Staging/Core:** Updated when you run `dbt run`
+- **Staging/Core:** Updated when dbt job runs
+
+## Databricks Integration
+
+The dbt project runs automatically in Databricks via a scheduled job triggered after Fivetran syncs.
+
+**Databricks Job Configuration:**
+- **Project directory:** `/Workspace/Users/drew.gilbert@hginsights.com/dbt_opsdb`
+- **SQL Warehouse:** Serverless Starter Warehouse (S)
+- **Catalog:** `rev_ops_prod`
+- **Commands:** `dbt deps` → `dbt seed` → `dbt run`
+
+### Deploying Changes to Databricks
+
+After pushing changes to GitHub, you must manually sync the Databricks repo:
+
+1. **Push to GitHub:**
+   ```bash
+   cd opsDB
+   git add .
+   git commit -m "Your commit message"
+   git push origin main
+   ```
+
+2. **Pull in Databricks:**
+   - Open https://hginsights-rev-ops-prod.cloud.databricks.com
+   - Navigate to: **Workspace** → **Users** → **drew.gilbert@hginsights.com** → **dbt_opsdb**
+   - Click the folder, then click **Pull**
+   - Confirm the pull when prompted ("Proceed with pulling?")
+
+3. **Verify:** The next dbt job run will use your updated code
+
+> **Important:** Databricks does NOT automatically sync from GitHub. You must manually pull after each push.
 
 ## Troubleshooting
 

@@ -29,7 +29,7 @@
 Salesforce (CRM)
     ↓ Fivetran (every 6 hours, automatic)
 gtm_raw (exact replica, managed by Fivetran)
-    ↓ dbt run (manual, YOU trigger this)
+    ↓ dbt run (triggered after Fivetran sync)
 gtm_staging (cleaned, deduplicated)
     ↓ dbt run (same command)
 gtm_core (business logic, ready for dashboards)
@@ -41,14 +41,50 @@ gtm_core (business logic, ready for dashboards)
 - **Salesforce → gtm_raw**: Fivetran syncs every 6 hours
 - **New fields in Salesforce**: Automatically appear in `gtm_raw` within 6 hours
 - **New objects in Salesforce**: Automatically appear in `gtm_raw` (if Fivetran configured)
+- **dbt run**: Triggered automatically in Databricks after Fivetran sync completes
 
 **Manual (You Must Do):**
-- **gtm_raw → gtm_staging**: Create staging model (SQL file)
-- **gtm_staging → gtm_core**: Create core model (SQL file)
+- **gtm_raw → gtm_staging**: Create/update staging model (SQL file)
+- **gtm_staging → gtm_core**: Create/update core model (SQL file)
 - **Documentation**: Add field descriptions to `schema.yml`
-- **Running**: Execute `dbt run` to materialize tables
+- **Push to GitHub**: Commit and push changes to `drewgilbert-lab/dbt_opsdb`
+- **Pull in Databricks**: Sync the Databricks Workspace repo to get latest code
 
-**Bottom Line:** Fivetran handles Salesforce → gtm_raw. You handle gtm_raw → gtm_core.
+**Bottom Line:** Fivetran handles Salesforce → gtm_raw. You handle gtm_raw → gtm_core. Databricks handles running dbt automatically.
+
+### Deployment Workflow
+
+After making changes to dbt models locally, follow this workflow to deploy:
+
+```
+1. LOCAL: Make changes to models (staging → core → schema.yml)
+       ↓
+2. LOCAL: Test with `dbt run --select <model_name>` (optional)
+       ↓
+3. GITHUB: Commit and push to drewgilbert-lab/dbt_opsdb
+       ↓
+4. DATABRICKS: Pull latest code in Workspace repo
+       ↓
+5. AUTOMATIC: dbt job runs after next Fivetran sync (or trigger manually)
+```
+
+**GitHub Repository:** https://github.com/drewgilbert-lab/dbt_opsdb
+
+**Push to GitHub:**
+```bash
+cd opsDB
+git add .
+git commit -m "Add new fields to <object> model"
+git push origin main
+```
+
+**Pull in Databricks:**
+1. Open Databricks workspace: https://hginsights-rev-ops-prod.cloud.databricks.com
+2. Navigate to: **Workspace** → **Users** → **drew.gilbert@hginsights.com** → **dbt_opsdb**
+3. Click the folder, then click **Pull** (or right-click → Git → Pull)
+4. Confirm the pull when prompted
+
+> **Important:** Changes pushed to GitHub are NOT automatically synced to Databricks. You must manually pull in Databricks after each push for the dbt job to use your updated code.
 
 ---
 
