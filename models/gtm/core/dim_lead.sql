@@ -12,7 +12,7 @@
     Source: stg_salesforce__lead
     Grain: One row per lead
 
-    Field count: 63 fields from Salesforce + minimal metadata
+    Field count: 64 fields from Salesforce + minimal metadata
     Note: Address compound field not included (components not specified in CSV)
     Last Updated: 2025-12-18
 */
@@ -62,6 +62,7 @@ SELECT
     -- Email & Communication Preferences
     has_opted_out_of_email,
     email_opt_out_date_c,
+    is_email_bounced_c,
     do_not_call,
 
     -- Campaign Attribution

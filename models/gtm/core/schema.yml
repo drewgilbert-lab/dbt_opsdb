@@ -443,6 +443,8 @@ models:
     description: has_opted_out_of_email field
   - name: email_opt_out_date_c
     description: email_opt_out_date_c field
+  - name: is_email_bounced_c
+    description: Indicates if the lead's email has bounced
   - name: do_not_call
     description: do_not_call field
   - name: recent_campaign_c

@@ -9,7 +9,7 @@
     Staging model for Salesforce Lead
     Source: rev_ops_prod.gtm_raw.lead (via Fivetran)
 
-    Field count: 63 fields (as of 2025-12-18)
+    Field count: 64 fields (as of 2025-12-18)
     Note: Address compound field not included (components not specified in CSV)
     Leads are pre-conversion prospects.
 */
@@ -64,6 +64,7 @@ deduplicated as (
         -- Email & Communication Preferences
         has_opted_out_of_email,
         email_opt_out_date_c,
+        is_email_bounced_c,
         do_not_call,
 
         -- Campaign Attribution
