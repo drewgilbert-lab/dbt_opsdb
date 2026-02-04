@@ -119,6 +119,8 @@ models:
   - name: hg_account_segment_c
     description: 'PRIMARY SEGMENT FIELD - Values: Commercial, SMB, Mid-Market, Strategic,
       Enterprise, Partner'
+  - name: fy_25_som_c
+    description: FY25 SOM (Serviceable Obtainable Market) value for the account
   - name: active_platform_users_c
     description: The field tracks the count of active platform users.
   - name: count_of_open_opportunities_c

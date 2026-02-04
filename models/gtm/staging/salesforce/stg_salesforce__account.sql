@@ -9,7 +9,7 @@
     Staging model for Salesforce Accounts
     Source: rev_ops_prod.gtm_raw.account (via Fivetran)
 
-    Field count: 54 fields (as of 2025-12-18)
+    Field count: 55 fields (as of 2025-12-18)
     Note: BillingAddress is a compound field and not included (components are: BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry, BillingLatitude, BillingLongitude)
 
     Transformations:
@@ -49,6 +49,9 @@ deduplicated as (
 
         -- PRIMARY SEGMENT FIELD (Critical!)
         hg_account_segment_c,
+
+        -- FY25 SOM
+        fy_25_som_c,
 
         -- Product Usage
         active_platform_users_c,

@@ -12,7 +12,7 @@
     Source: stg_salesforce__account
     Grain: One row per account
 
-    Field count: 54 fields from Salesforce + minimal metadata
+    Field count: 55 fields from Salesforce + minimal metadata
     Note: BillingAddress compound field excluded (components included)
     Last Updated: 2025-12-18
 */
@@ -44,6 +44,9 @@ SELECT
     -- PRIMARY SEGMENT FIELD (Critical! - replaces old account_segment)
     -- Per colleague feedback: "the primary segment field is hg_account_segment__c"
     hg_account_segment_c,
+
+    -- FY25 SOM
+    fy_25_som_c,
 
     -- Product Usage
     active_platform_users_c,
